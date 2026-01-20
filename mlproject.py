@@ -18,13 +18,14 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
-from google.colab import drive
-drive.mount('/content/drive')
+#from google.colab import drive
+#drive.mount('/content/drive')
 
-DATA_PATH = "/content/drive/MyDrive/yidu/"
+DATA_PATH = r"C:\Users\user\Downloads\Machin Learning Project\yidu"
 
-train = pd.read_csv(DATA_PATH + "train.csv", parse_dates=["date"])
-test = pd.read_csv(DATA_PATH + "test.csv", parse_dates=["date"])
+
+train = pd.read_csv(DATA_PATH + "\\train.csv", parse_dates=["date"])
+test = pd.read_csv(DATA_PATH + "\\test.csv", parse_dates=["date"])
 print(train.shape)
 print(train.head())
 
@@ -273,7 +274,25 @@ plt.show()
 plt.figure(figsize=(10,4))
 plt.plot(np.cumsum(np.abs(y_test - rf_preds)), label="RF")
 plt.plot(np.cumsum(np.abs(y_test - lgb_preds)), label="LightGBM")
-plt.plot(np.cumsum(np.abs(y_test - hybrid_preds)), label="Hybrid")
+# Convert to numpy arrays
+y_true = y_test.values
+y_pred = np.array(hybrid_preds)
+
+# Align lengths (important for LSTM-based models)
+min_len = min(len(y_true), len(y_pred))
+y_true = y_true[-min_len:]
+y_pred = y_pred[-min_len:]
+
+# Plot cumulative absolute error
+plt.plot(
+    np.cumsum(np.abs(y_true - y_pred)),
+    label="Hybrid"
+)
+
+#plt.plot(np.cumsum(np.abs(y_test.values - np.array(hybrid_preds))),
+    #label="Hybrid")
+
+#plt.plot(np.cumsum(np.abs(y_test - hybrid_preds)), label="Hybrid")
 plt.title("Cumulative Absolute Error Over Time")
 plt.xlabel("Time")
 plt.ylabel("Cumulative Error")
@@ -281,7 +300,7 @@ plt.legend()
 plt.show()
 
 # Install ipywidgets if not already installed
-!pip install ipywidgets
+#!pip install ipywidgets
 
 import pandas as pd
 import numpy as np
@@ -289,8 +308,13 @@ import matplotlib.pyplot as plt
 from ipywidgets import interact, IntSlider, Dropdown
 
 # Load data
-DATA_PATH = "/content/drive/MyDrive/yidu/"
-train = pd.read_csv(DATA_PATH + "train.csv", parse_dates=["date"])
+#DATA_PATH = "/content/drive/MyDrive/yidu/"
+from pathlib import Path
+
+DATA_PATH = Path(r"C:\Users\user\Downloads\Machin Learning Project\yidu")
+train = pd.read_csv(DATA_PATH / "train.csv", parse_dates=["date"])
+
+#train = pd.read_csv(DATA_PATH + "\\train.csv", parse_dates=["date"])
 
 # Unique stores and items
 stores = train["store"].unique()
